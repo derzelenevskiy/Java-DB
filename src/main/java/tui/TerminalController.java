@@ -1,9 +1,6 @@
 package tui;
 
-import org.jline.reader.EndOfFileException;
-import org.jline.reader.LineReader;
-import org.jline.reader.LineReaderBuilder;
-import org.jline.reader.UserInterruptException;
+import org.jline.reader.*;
 import org.jline.reader.impl.history.DefaultHistory;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
@@ -18,9 +15,10 @@ public class TerminalController {
     private volatile boolean isRunning;
     public TerminalController() throws IOException {
         this.terminal = TerminalBuilder.builder().system(true).provider("ffm").build();
-        this.reader = LineReaderBuilder.builder().terminal(terminal).history(new DefaultHistory()).variable(LineReader.HISTORY_FILE, Path.of("history.txt")).highlighter(new SqlHighlighter()).completer(new SqlCompleter()).build();
+        //this.reader = LineReaderBuilder.builder().terminal(terminal).history(new DefaultHistory()).variable(LineReader.HISTORY_FILE, Path.of("history.txt")).highlighter(new SqlHighlighter()).completer(new SqlCompleter()).build();
+        this.reader = LineReaderBuilder.builder().terminal(terminal).history(new DefaultHistory()).variable(LineReader.HISTORY_FILE, Path.of("history.txt")).build();
         ResultPresenter presenter = new ResultPresenter();
-        MetaCommandHandler metaCommandHandler = new MetaCommandHandler();
+        MetaCommandHandler metaCommandHandler = new MetaCommandHandler(terminal);
     }
     public void run() throws IOException {
         terminal.writer().println("Welcome to JavaDB! Type \\help for help, \\exit to quit");

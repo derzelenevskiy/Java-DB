@@ -18,9 +18,23 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>Main</mainClass>
+                  <mainClass>org.example.Main</mainClass>
+                  <manifestEntries>
+                    <Multi-Release>true</Multi-Release>
+                  </manifestEntries>
                 </transformer>
+                <transformer />
               </transformers>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
             </configuration>
           </execution>
         </executions>

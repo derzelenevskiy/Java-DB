@@ -21,16 +21,10 @@
             <version>4.4.3</version>
         </dependency>
         <dependency>
-            <groupId>org.jline</groupId>
-            <artifactId>jline-terminal-ffm</artifactId>
-            <version>4.4.3</version>
-        </dependency>
-        <dependency>
             <groupId>com.jakewharton.fliptables</groupId>
             <artifactId>fliptables</artifactId>
             <version>1.1.1</version>
         </dependency>
-
     </dependencies>
     <build>
         <plugins>
@@ -48,7 +42,11 @@
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>org.example.Main</mainClass>
+                                    <manifestEntries>
+                                        <Multi-Release>true</Multi-Release>
+                                    </manifestEntries>
                                 </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                             </transformers>
                             <filters>
                                 <filter>

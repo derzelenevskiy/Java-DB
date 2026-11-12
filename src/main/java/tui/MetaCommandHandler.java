@@ -7,8 +7,8 @@ import java.io.IOException;
 
 public class MetaCommandHandler {
     Terminal terminal;
-    public MetaCommandHandler() throws IOException {
-        this.terminal = TerminalBuilder.builder().system(true).provider("ffm").build();
+    public MetaCommandHandler(Terminal terminal) throws IOException {
+        this.terminal = terminal;
     }
     public boolean check(String line) {
         return line.startsWith("\\");
