@@ -1,7 +1,7 @@
 package tui;
 
 import dev.tamboui.tui.event.KeyEvent;
-import dev.tamboui.widgets.input.TextInputState;
+import dev.tamboui.widgets.input.TextAreaState;
 import model.QueryResult;
 
 import java.util.ArrayList;
@@ -9,13 +9,13 @@ import java.util.List;
 
 public class UiState {
     public UiState(List<PaletteCommand> paletteCommandList) {
-        this.inputState = new TextInputState();
+        this.inputState = new TextAreaState();
         this.suggestions = new ArrayList<>();
         this.history = new ArrayList<>();
         this.paletteCommandList = paletteCommandList;
     }
 
-    public TextInputState getInputState() {
+    public TextAreaState getInputState() {
         return inputState;
     }
 
@@ -34,7 +34,7 @@ public class UiState {
     public record HistoryEntry(String query, QueryResult queryResult) {}
     public record PaletteCommand(String title, String shortcut, Runnable action) {}
 
-    private final TextInputState inputState;
+    private final TextAreaState inputState;
     private boolean isActiveMode = false;
     private boolean isRunning = true;
     private final List<HistoryEntry> history;
@@ -46,6 +46,15 @@ public class UiState {
     private int selectedSuggestionIndex = 0;
     private final AutoSuggestionEngine suggestionEngine = new AutoSuggestionEngine();
     private String currentSuffix = "";
+
+    public static boolean isCursorAtEnd(TextAreaState state) {
+        int lastRow = state.lineCount() - 1;
+        if (state.cursorRow() != lastRow) {
+            return false;
+        }
+        int lastLineLength = state.getLine(lastRow).length();
+        return state.cursorCol() == lastLineLength;
+    }
 
     public boolean onKeyEvent(KeyEvent event) {
         if(isPaletteOpen) {
@@ -120,7 +129,7 @@ public class UiState {
                     return true;
                 }
                 case RIGHT -> {
-                    if (!currentSuffix.isEmpty() && inputState.cursorPosition() == inputState.length())
+                    if (!currentSuffix.isEmpty() && isCursorAtEnd(inputState))
                     {
                         if (event.modifiers().ctrl()) {
                             String word = suggestionEngine.getNextWord(currentSuffix);
@@ -133,6 +142,14 @@ public class UiState {
                     } else {
                         inputState.moveCursorRight();
                     }
+                    return true;
+                }
+                case ENTER -> {
+                    if (event.modifiers().ctrl()) {
+                        //
+                        return true;
+                    }
+                    inputState.insert('\n');
                     return true;
                 }
             }
@@ -211,6 +228,15 @@ public class UiState {
     }
     public void exit() {
         this.isRunning = false;
+    }
+    public int getLineCount() {
+        return inputState.lineCount();
+    }
+    public int getCursorRow() {
+        return inputState.cursorRow();
+    }
+    public int getCursorCol() {
+        return inputState.cursorCol();
     }
 }
 

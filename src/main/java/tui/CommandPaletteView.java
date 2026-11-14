@@ -1,11 +1,9 @@
 package tui;
 
 import dev.tamboui.buffer.Buffer;
-import dev.tamboui.layout.Alignment;
-import dev.tamboui.layout.Constraint;
-import dev.tamboui.layout.Layout;
-import dev.tamboui.layout.Rect;
+import dev.tamboui.layout.*;
 import dev.tamboui.style.Style;
+import dev.tamboui.terminal.Frame;
 import dev.tamboui.text.Line;
 import dev.tamboui.text.Text;
 import dev.tamboui.widgets.Clear;
@@ -21,7 +19,8 @@ import java.util.List;
 
 public class CommandPaletteView {
 
-    public void render(Rect rect, Buffer buffer, UiState uiState) {
+    public void render(Rect rect, Frame frame, UiState uiState) {
+        Buffer buffer = frame.buffer();
         Layout verticalLayout = Layout.vertical().constraints(
                 Constraint.fill(),
                 Constraint.length(10),

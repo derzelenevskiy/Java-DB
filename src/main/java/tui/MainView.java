@@ -1,7 +1,7 @@
 package tui;
 
-import dev.tamboui.buffer.Buffer;
 import dev.tamboui.layout.Rect;
+import dev.tamboui.terminal.Frame;
 
 public class MainView {
     private final ActiveView activeView;
@@ -10,18 +10,18 @@ public class MainView {
     public MainView() {
         AutoSuggestionEngine suggestionEngine = new AutoSuggestionEngine();
         SqlHighlighter highlighter = new SqlHighlighter();
-        this.welcomeView = new WelcomeView(suggestionEngine, highlighter);
-        this.activeView = new ActiveView(suggestionEngine, highlighter);
+        this.welcomeView = new WelcomeView(highlighter);
+        this.activeView = new ActiveView(highlighter);
         this.paletteView = new CommandPaletteView();
     }
-    public void render(Rect rect, Buffer buffer, UiState uiState) {
+    public void render(Rect rect, Frame frame, UiState uiState) {
         if (uiState.isActiveMode()) {
-            activeView.render(rect, buffer, uiState);
+            activeView.render(rect, frame, uiState);
         } else {
-            welcomeView.render(rect, buffer, uiState);
+            welcomeView.render(rect, frame, uiState);
         }
         if (uiState.isPaletteOpen()) {
-            paletteView.render(rect, buffer, uiState);
+            paletteView.render(rect, frame, uiState);
         }
     }
 }

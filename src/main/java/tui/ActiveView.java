@@ -9,6 +9,7 @@ import dev.tamboui.layout.Rect;
 import dev.tamboui.style.Color;
 import dev.tamboui.style.Overflow;
 import dev.tamboui.style.Style;
+import dev.tamboui.terminal.Frame;
 import dev.tamboui.text.Line;
 import dev.tamboui.text.MarkupParser;
 import dev.tamboui.text.Text;
@@ -19,22 +20,25 @@ import dev.tamboui.widgets.paragraph.Paragraph;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Math.min;
+
 public class ActiveView {
-    private final AutoSuggestionEngine suggestionEngine;
     private final SqlHighlighter highlighter;
     private final static Paragraph footer = Paragraph.builder().text(MarkupParser.parse("[#EEEEEE]ctrl+h[/] [#3C3C3C]history[/]  [#EEEEEE]ctrl+p[/] [#3C3C3C]commands[/]")).alignment(Alignment.RIGHT).build();
     private final static Paragraph session = Paragraph.from("Database 1");
-    public ActiveView(AutoSuggestionEngine suggestionEngine, SqlHighlighter highlighter) {
-        this.suggestionEngine = suggestionEngine;
+    public ActiveView(SqlHighlighter highlighter) {
         this.highlighter = highlighter;
     }
 
-    public void render(Rect rect, Buffer buffer, UiState uiState) {
+    public void render(Rect rect, Frame frame, UiState uiState) {
+        Buffer buffer = frame.buffer();
+        int totalLines = uiState.getLineCount() > 0 ? uiState.getLineCount() : 1;
+        totalLines = totalLines < 6 ? totalLines : 5;
         Layout verticalLayout = Layout.vertical()
                 .constraints(
                         Constraint.length(1),
                         Constraint.fill(),
-                        Constraint.length(3),
+                        Constraint.length(totalLines + 2),
                         Constraint.length(1)
                 );
         List<Rect> frames = verticalLayout.split(rect);
@@ -42,13 +46,13 @@ public class ActiveView {
         session.render(frames.get(0), buffer);
 
         Rect feedRect = frames.get(1);
-        List<Line> lines = new ArrayList<>();
+        List<Line> feedLines = new ArrayList<>();
         UiState.HistoryEntry lastRecord = uiState.getHistory().getLast();
-        lines.add(Line.from(highlighter.highlight("> " + lastRecord.query())));
-        lines.add(Line.from(""));
+        feedLines.add(Line.from(highlighter.highlight("> " + lastRecord.query())));
+        feedLines.add(Line.from(""));
         if(!lastRecord.queryResult().isSuccess()) {
             Line line = Line.styled(lastRecord.queryResult().errorMessage(), Style.EMPTY.fg(Color.RED));
-            lines.add(line);
+            feedLines.add(line);
         } else {
             String s = String.valueOf(lastRecord.queryResult().execution());
             if (lastRecord.queryResult().headers() != null && lastRecord.queryResult().headers().length > 0) {
@@ -65,34 +69,42 @@ public class ActiveView {
                     String table = FlipTable.of(headers, stringData);
                     String[] tableArr = table.split("\n");
                     for (String str : tableArr) {
-                        lines.add(Line.from(str));
+                        feedLines.add(Line.from(str));
                     }
                 }
-                String time = s;
-                lines.add(Line.from(""));
-                lines.add(Line.styled("Execution time:" + time + "ms", Style.EMPTY.fg(Color.GRAY)));
+                feedLines.add(Line.from(""));
+                feedLines.add(Line.styled("Execution time:" + s + "ms", Style.EMPTY.fg(Color.GRAY)));
             } else {
-                lines.add(Line.styled("Query OK", Style.EMPTY.fg(Color.GREEN)));
-                String time = s;
-                lines.add(Line.from(""));
-                lines.add(Line.styled("Execution time:" + time + "ms", Style.EMPTY.fg(Color.GRAY)));
+                feedLines.add(Line.styled("Query OK", Style.EMPTY.fg(Color.GREEN)));
+                feedLines.add(Line.from(""));
+                feedLines.add(Line.styled("Execution time:" + s + "ms", Style.EMPTY.fg(Color.GRAY)));
             }
         }
-        Paragraph feedParagraph = Paragraph.builder().text(Text.from(lines)).overflow(Overflow.WRAP_WORD).build();
+        Paragraph feedParagraph = Paragraph.builder().text(Text.from(feedLines)).overflow(Overflow.WRAP_WORD).build();
         feedParagraph.render(feedRect, buffer);
 
         Block inputBox = Block.builder().borders(Borders.ALL).borderStyle(Style.EMPTY.fg(Color.DARK_GRAY)).build();
         inputBox.render(frames.get(2), buffer);
         Rect innerRect = inputBox.inner(frames.get(2));
         String text = uiState.getInputState().text();
+        int scrollOffset = uiState.getCursorCol() < 5 ? 0 : uiState.getCursorRow() - 5 + 1;
         if (text.isEmpty()) {
             Paragraph hint = Paragraph.builder().text("Ask anything...").foreground(Color.LIGHT_YELLOW).build();
             hint.render(innerRect, buffer);
         } else {
-            String suffix = suggestionEngine.getSuggestionSuffix(text, uiState.getHistory());
-            Line line = Line.from(highlighter.ghostHighlight(text, suffix));
-            Paragraph inputParagraph = Paragraph.from(line);
-            inputParagraph.render(innerRect, buffer);
+            List<Line> lines = new ArrayList<>();
+            String[] textArr = text.split("\n", -1);
+            for (int i = scrollOffset; i < min(textArr.length, scrollOffset + 5); ++i) {
+                lines.add(Line.from(highlighter.highlight(textArr[i])));
+                if (i == textArr.length - 1) {
+                    lines.add(Line.from(highlighter.ghostHighlight(textArr[i], uiState.getCurrentSuffix())));
+                }
+            }
+            Paragraph paragraph = Paragraph.builder().text(Text.from(lines)).overflow(Overflow.WRAP_WORD).build();
+            paragraph.render(innerRect, buffer);
         }
+        int x = innerRect.x() + uiState.getInputState().cursorCol();
+        int y = innerRect.y() + uiState.getInputState().cursorRow() - scrollOffset;
+        frame.setCursorPosition(x, y);
     }
 }
