@@ -1,6 +1,5 @@
 package tui;
 
-import dev.tamboui.tui.event.KeyCode;
 import dev.tamboui.tui.event.KeyEvent;
 import dev.tamboui.widgets.input.TextInputState;
 import model.QueryResult;
@@ -14,6 +13,14 @@ public class UiState {
         this.suggestions = new ArrayList<>();
         this.history = new ArrayList<>();
         this.paletteCommandList = paletteCommandList;
+    }
+
+    public TextInputState getInputState() {
+        return inputState;
+    }
+
+    public List<HistoryEntry> getHistory() {
+        return history;
     }
 
     public record HistoryEntry(String query, QueryResult queryResult) {}
