@@ -1,6 +1,6 @@
 package storage;
 
-import db.DataBase;
+import db.Database;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -15,7 +15,7 @@ public class FileStorageService {
         Files.createDirectories(storageDir);
     }
 
-    public void save(DataBase db) throws IOException {
+    public void save(Database db) throws IOException {
         if (db == null) {
             throw new IllegalArgumentException("Database cannot be null");
         }
@@ -29,16 +29,16 @@ public class FileStorageService {
         Files.move(tmpDb, storageDb, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
     }
 
-    public DataBase load() throws IOException {
+    public Database load() throws IOException {
         if (check()) {
             try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(Files.newInputStream(storageDb)))) {
-                return (DataBase) ois.readObject();
+                return (Database) ois.readObject();
             } catch (IOException | ClassNotFoundException e) {
                 throw new RuntimeException("Failed to load database from file", e);
             }
         }
         else {
-            return new DataBase();
+            return new Database();
         }
     }
 
