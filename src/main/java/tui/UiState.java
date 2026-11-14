@@ -56,45 +56,37 @@ public class UiState {
         return state.cursorCol() == lastLineLength;
     }
 
-    public boolean onKeyEvent(KeyEvent event) {
+    public void onKeyEvent(KeyEvent event) {
         if(isPaletteOpen) {
             switch (event.code()) {
                 case UP -> {
                     decrementPaletteIndex();
-                    return true;
                 }
                 case DOWN -> {
                     incrementPaletteIndex();
-                    return true;
                 }
                 case ENTER -> {
                     getCommand(selectedPaletteIndex).action.run();
                     closePalette();
-                    return true;
                 }
                 case ESCAPE -> {
                     closePalette();
-                    return true;
                 }
             }
         } else if (isAutocompleteOpen) {
             switch (event.code()) {
                 case UP -> {
                     decrementAutocompleteIndex();
-                    return true;
                 }
                 case DOWN -> {
                     incrementAutocompleteIndex();
-                    return true;
                 }
                 case TAB, ENTER -> {
                     inputState.setText(suggestions.get(selectedSuggestionIndex));
                     currentSuffix = "";
-                    return true;
                 }
                 case ESCAPE -> {
                     closeAutocomplete();
-                    return true;
                 }
             }
         } else {
@@ -102,31 +94,25 @@ public class UiState {
                 case CHAR -> {
                     if (event.modifiers().ctrl() && (event.isChar('P') || event.isChar('p'))) {
                         openPalette();
-                        return true;
                     }
                     else if (event.modifiers().ctrl() && (event.isChar('H') || event.isChar('h'))) {
                         openAutocomplete();
-                        return true;
                     }
                     else {
                         inputState.insert(event.string());
                         this.currentSuffix = suggestionEngine.getSuggestionSuffix(inputState.text(), history);
-                        return true;
                     }
                 }
                 case BACKSPACE -> {
                     inputState.deleteBackward();
                     this.currentSuffix = suggestionEngine.getSuggestionSuffix(inputState.text(), history);
-                    return true;
                 }
                 case DELETE -> {
                     inputState.deleteForward();
                     this.currentSuffix = suggestionEngine.getSuggestionSuffix(inputState.text(), history);
-                    return true;
                 }
                 case LEFT -> {
                     inputState.moveCursorLeft();
-                    return true;
                 }
                 case RIGHT -> {
                     if (!currentSuffix.isEmpty() && isCursorAtEnd(inputState))
@@ -142,19 +128,12 @@ public class UiState {
                     } else {
                         inputState.moveCursorRight();
                     }
-                    return true;
                 }
                 case ENTER -> {
-                    if (event.modifiers().ctrl()) {
-                        //
-                        return true;
-                    }
                     inputState.insert('\n');
-                    return true;
                 }
             }
         }
-        return false;
     }
 
     public int getSelectedPaletteIndex() {
