@@ -23,31 +23,81 @@ public class UiState {
         return history;
     }
 
+    public List<PaletteCommand> getPaletteCommandList() {
+        return paletteCommandList;
+    }
+
+    public boolean isActiveMode() {
+        return isActiveMode;
+    }
+
     public record HistoryEntry(String query, QueryResult queryResult) {}
     public record PaletteCommand(String title, String shortcut, Runnable action) {}
 
     private final TextInputState inputState;
     private boolean isActiveMode = false;
     private boolean isRunning = true;
-    private List<HistoryEntry> history;
+    private final List<HistoryEntry> history;
     private boolean isPaletteOpen = false;
     private final List<PaletteCommand> paletteCommandList;
     private int selectedPaletteIndex = 0;
     private boolean isAutocompleteOpen = false;
-    private List<String> suggestions;
+    private final List<String> suggestions;
     private int selectedSuggestionIndex = 0;
     private final AutoSuggestionEngine suggestionEngine = new AutoSuggestionEngine();
     private String currentSuffix = "";
 
     public boolean onKeyEvent(KeyEvent event) {
-        if(!isPaletteOpen && !isAutocompleteOpen) {
+        if(isPaletteOpen) {
+            switch (event.code()) {
+                case UP -> {
+                    decrementPaletteIndex();
+                    return true;
+                }
+                case DOWN -> {
+                    incrementPaletteIndex();
+                    return true;
+                }
+                case ENTER -> {
+                    getCommand(selectedPaletteIndex).action.run();
+                    closePalette();
+                    return true;
+                }
+                case ESCAPE -> {
+                    closePalette();
+                    return true;
+                }
+            }
+        } else if (isAutocompleteOpen) {
+            switch (event.code()) {
+                case UP -> {
+                    decrementAutocompleteIndex();
+                    return true;
+                }
+                case DOWN -> {
+                    incrementAutocompleteIndex();
+                    return true;
+                }
+                case TAB, ENTER -> {
+                    inputState.setText(suggestions.get(selectedSuggestionIndex));
+                    currentSuffix = "";
+                    return true;
+                }
+                case ESCAPE -> {
+                    closeAutocomplete();
+                    return true;
+                }
+            }
+        } else {
             switch (event.code()) {
                 case CHAR -> {
                     if (event.modifiers().ctrl() && (event.isChar('P') || event.isChar('p'))) {
                         openPalette();
+                        return true;
                     }
                     else if (event.modifiers().ctrl() && (event.isChar('H') || event.isChar('h'))) {
                         openAutocomplete();
+                        return true;
                     }
                     else {
                         inputState.insert(event.string());
@@ -70,53 +120,28 @@ public class UiState {
                     return true;
                 }
                 case RIGHT -> {
-                    if (event.modifiers().ctrl()) {
-                        String word = suggestionEngine.getNextWord(currentSuffix);
-                        inputState.insert(word);
-                        currentSuffix = currentSuffix.substring(word.length());
+                    if (!currentSuffix.isEmpty() && inputState.cursorPosition() == inputState.length())
+                    {
+                        if (event.modifiers().ctrl()) {
+                            String word = suggestionEngine.getNextWord(currentSuffix);
+                            inputState.insert(word);
+                            currentSuffix = currentSuffix.substring(word.length());
+                        } else {
+                            inputState.insert(currentSuffix);
+                            currentSuffix = "";
+                        }
                     } else {
-                        inputState.insert(currentSuffix);
-                        currentSuffix = "";
+                        inputState.moveCursorRight();
                     }
-                    return true;
-                }
-            }
-        } else if (!isAutocompleteOpen) {
-            switch (event.code()) {
-                case UP -> {
-                    decrementPaletteIndex();
-                    return true;
-                }
-                case DOWN -> {
-                    incrementPaletteIndex();
-                    return true;
-                }
-                case ENTER -> {
-                    execute(getCommand(selectedPaletteIndex));
-                    return true;
-                }
-                case ESCAPE -> {
-                    closePalette();
-                    return true;
-                }
-            }
-        } else {
-            switch (event.code()) {
-                case UP -> {
-                    decrementAutocompleteIndex();
-                    return true;
-                }
-                case DOWN -> {
-                    incrementAutocompleteIndex();
-                    return true;
-                }
-                case TAB, ENTER -> {
-                    //
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    public int getSelectedPaletteIndex() {
+        return selectedPaletteIndex;
     }
 
     private void incrementPaletteIndex() {
@@ -127,10 +152,14 @@ public class UiState {
     }
 
     private void incrementAutocompleteIndex() {
-        selectedSuggestionIndex = (selectedSuggestionIndex + 1) % suggestions.size();
+        if (!suggestions.isEmpty()) {
+            selectedSuggestionIndex = (selectedSuggestionIndex + 1) % suggestions.size();
+        }
     }
     private void decrementAutocompleteIndex() {
-        selectedSuggestionIndex = (selectedSuggestionIndex - 1 + suggestions.size()) % suggestions.size();
+        if (!suggestions.isEmpty()) {
+            selectedSuggestionIndex = (selectedSuggestionIndex - 1 + suggestions.size()) % suggestions.size();
+        }
     }
     public PaletteCommand getCommand(int index) {
         return paletteCommandList.get(index);
@@ -154,10 +183,34 @@ public class UiState {
     public void addCmd(String cmd, QueryResult result) {
         history.add(new HistoryEntry(cmd, result));
         isActiveMode = true;
+        currentSuffix = "";
+        inputState.clear();
     }
     public void clear() {
         history.clear();
         isActiveMode = false;
+    }
+    public String getCurrentSuffix() {
+        return currentSuffix;
+    }
+    public boolean isPaletteOpen() {
+        return isPaletteOpen;
+    }
+    public boolean isAutocompleteOpen() {
+        return isAutocompleteOpen;
+    }
+
+    public int getSelectedSuggestionIndex() {
+        return selectedSuggestionIndex;
+    }
+    public List<String> getSuggestions() {
+        return suggestions;
+    }
+    public boolean isRunning() {
+        return isRunning;
+    }
+    public void exit() {
+        this.isRunning = false;
     }
 }
 

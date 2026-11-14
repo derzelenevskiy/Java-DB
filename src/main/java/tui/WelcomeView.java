@@ -54,10 +54,12 @@ public class WelcomeView {
             Paragraph hint = Paragraph.builder().text("Ask anything...").foreground(Color.LIGHT_YELLOW).build();
             hint.render(innerRect, buffer);
         } else {
-            String suffix = suggestionEngine.getSuggestionSuffix(text, uiState.getHistory());
-            Line line = Line.from(highlighter.ghostHighlight(text, suffix));
+            Line line = Line.from(highlighter.ghostHighlight(text, uiState.getCurrentSuffix()));
             Paragraph paragraph = Paragraph.from(line);
             paragraph.render(innerRect, buffer);
         }
+        int x = innerRect.x() + uiState.getInputState().cursorPosition();
+        int y = innerRect.y();
+
     }
 }

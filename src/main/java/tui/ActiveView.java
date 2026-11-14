@@ -28,6 +28,7 @@ public class ActiveView {
         this.suggestionEngine = suggestionEngine;
         this.highlighter = highlighter;
     }
+
     public void render(Rect rect, Buffer buffer, UiState uiState) {
         Layout verticalLayout = Layout.vertical()
                 .constraints(
