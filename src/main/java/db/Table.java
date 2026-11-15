@@ -57,7 +57,7 @@ public class Table implements Serializable {
         for (int i = 0; i < entry.length; ++i) {
             if (fields.contains(i)) {
                 if (!this.entryTemplate[i].equals(values[fields.indexOf(i)].getClass()) && !(!(i == this.primary) && values[fields.indexOf(i)].equals(this.nullObject))) throw new TypeMismatchException();
-                if (this.references.containsKey(i) && !this.references.get(i).getKeys().contains(values[fields.indexOf(i)]))  throw new InvalidReferenceException();
+                if (this.references.containsKey(i) && !this.references.get(i).getKeys().contains(values[fields.indexOf(i)]) && !values[fields.indexOf(i)].equals(this.nullObject))  throw new InvalidReferenceException();
                 entry[i] = values[fields.indexOf(i)];
             }
             else {
