@@ -14,8 +14,6 @@ public class Table implements Serializable {
     private final int primary;
     private final Class<?>[] entryTemplate;
     private final HashMap<Object, Object[]> table;
-//    private final ArrayList<TreeMap<Object, Set<Object>>> explicitIndexes;
-//    private final ArrayList<TreeMap<Object, Set<Object>>> tempIndexes;
     private final NullObject nullObject;
 
     public Table(String[] fieldNames, Class<?>[] types, int primary, NullObject nullObject) {
@@ -33,8 +31,6 @@ public class Table implements Serializable {
         this.nullObject = nullObject;
         this.foreignKeys = new ArrayList<>();
         this.references = new LinkedHashMap<>();
-//        this.explicitIndexes = new ArrayList<>();
-//        this.tempIndexes = new ArrayList<>();
         for (var field: references.keySet()) {
             var index = this.columnIndexes.get(field);
             if (index == null) throw new InvalidFieldException();
@@ -113,14 +109,10 @@ public class Table implements Serializable {
             if (rows.length > 1 || !values[primaryIndex].equals(rows[0][this.primary]) && this.table.get(values[primaryIndex]) != null || values[primaryIndex].equals(this.nullObject)) throw new IllegalUpdateException();
 
             var oldPrimary = rows[0][this.primary];
-            for (int i = 0; i < fields.length; ++i) {
-                if (fieldIndexes.get(i) == this.primary) {
-                    for (var foreign: foreignKeys) foreign.table().update(new String[] {foreign.field()}, new Object[] {values[i]}, foreign.field(), oldPrimary, Comparator.EQUAL);
-                }
-                rows[0][fieldIndexes.get(i)] = values[i];
-            }
+            for (int i = 0; i < fields.length; ++i) rows[0][fieldIndexes.get(i)] = values[i];
             this.table.remove(oldPrimary);
             this.table.put(values[primaryIndex], rows[0]);
+            for (var foreign: foreignKeys) foreign.table().update(new String[] {foreign.field()}, new Object[] {values[primaryIndex]}, foreign.field(), oldPrimary, Comparator.EQUAL);
             return 1;
         }
         for (var row: rows) {
