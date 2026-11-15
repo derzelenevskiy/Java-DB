@@ -13,6 +13,7 @@ public class UiState {
         this.directoryCommandList = directoryCommandList;
         this.inputState = new TextAreaState();
         this.suggestions = new ArrayList<>();
+        this.successfulHistory = new ArrayList<>();
         this.history = new ArrayList<>();
         this.paletteCommandList = paletteCommandList;
     }
@@ -23,6 +24,9 @@ public class UiState {
 
     public List<HistoryEntry> getHistory() {
         return history;
+    }
+    public List<HistoryEntry> getSuccessfulHistory() {
+        return getSuccessfulHistory();
     }
 
     public List<PaletteCommand> getPaletteCommandList() {
@@ -37,7 +41,7 @@ public class UiState {
     public record PaletteCommand(String title, String shortcut, Runnable action) {}
     public record DirectoryCommand(String title, Runnable action) {}
 
-
+    private List<HistoryEntry> successfulHistory;
     private final TextAreaState inputState;
     private boolean isActiveMode = false;
     private boolean isRunning = true;
@@ -233,8 +237,8 @@ public class UiState {
 
         suggestions.clear();
 
-        for (int i = history.size() - 1; i >= 0; i--) {
-            suggestions.add(history.get(i).query());
+        for (int i = successfulHistory.size() - 1; i >= 0; i--) {
+            suggestions.add(successfulHistory.get(i).query());
         }
     }
     public void closeAutocomplete() {
@@ -242,6 +246,9 @@ public class UiState {
         selectedSuggestionIndex = 0;
     }
     public void addCmd(String cmd, QueryResult result) {
+        if (result.isSuccess()) {
+            successfulHistory.add(new HistoryEntry(cmd, result));
+        }
         history.add(new HistoryEntry(cmd, result));
         isActiveMode = true;
         currentSuffix = "";
