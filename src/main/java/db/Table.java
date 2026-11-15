@@ -157,7 +157,7 @@ public class Table implements Serializable {
                 }
                 rows[0][fieldIndexes.get(i)] = values[i];
             }
-            this.table.remove(rows[0][this.primary]);
+            this.table.remove(oldPrimary);
             this.table.put(values[primaryIndex], rows[0]);
             return 1;
         }
