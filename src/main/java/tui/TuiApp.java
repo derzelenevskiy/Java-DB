@@ -21,13 +21,13 @@ public class TuiApp {
     private final UiState uiState;
     private final MainView mainView;
     private final DemoDataInitializer demoDataInitializer = new DemoDataInitializer();
-    public TuiApp(Database db, FileStorageService storageService, RequestHandler requestHandler) {
-        this.db = db;
+    public TuiApp(FileStorageService storageService) {
+        this.db = new Database();
         this.storageService = storageService;
         List<UiState.DirectoryCommand> directoryCommandList = new ArrayList<>();
         List<UiState.PaletteCommand> paletteCommandList = new ArrayList<>();
         this.uiState = new UiState(paletteCommandList, directoryCommandList);
-        this.requestHandler = requestHandler;
+        this.requestHandler = new RequestHandler(db);
         paletteCommandList.addAll(createPaletteCommandList());
         this.mainView = new MainView();
     }
@@ -59,31 +59,16 @@ public class TuiApp {
                                         uiState.addCmd(sql, result);
                                     }
                                 } else {
-                                    switch (sql) {
-                                        case "\\dt" -> {
-                                            uiState.getPaletteCommandList().getFirst().action().run();
+                                    boolean found = false;
+                                    for (UiState.PaletteCommand cmd : uiState.getPaletteCommandList()) {
+                                        if (cmd.shortcut().equals(sql)) {
+                                            cmd.action().run();
+                                            found = true;
+                                            break;
                                         }
-                                        case "\\di" -> {
-                                            uiState.getPaletteCommandList().get(1).action().run();
-                                        }
-                                        case "\\save" -> {
-                                            uiState.getPaletteCommandList().get(3).action().run();
-                                        }
-                                        case "\\demo" -> {
-                                            uiState.getPaletteCommandList().get(4).action().run();
-                                        }
-                                        case "\\democlear" -> {
-                                            uiState.getPaletteCommandList().get(5).action().run();
-                                        }
-                                        case "\\bench" -> {
-                                            uiState.getPaletteCommandList().get(6).action().run();
-                                        }
-                                        case "\\help" -> {
-                                            uiState.getPaletteCommandList().get(7).action().run();
-                                        }
-                                        default -> {
-                                            uiState.addCmd(sql, new QueryResult(false, "Unknown command" ,null, null, 0));
-                                        }
+                                    }
+                                    if (!found) {
+                                        uiState.addCmd(sql, new QueryResult(false, "Unknown command", null, null, 0));
                                     }
                                 }
                             }

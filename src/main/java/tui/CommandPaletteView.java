@@ -49,7 +49,7 @@ public class CommandPaletteView {
             UiState.PaletteCommand cmd = commands.get(i);
             boolean isSelected = (i == uiState.getSelectedPaletteIndex());
 
-            Style rowStyle = isSelected ? Style.EMPTY.bg(Color.hex("#FAB283")).fg(Color.BLACK).bold() : Style.EMPTY.fg(Color.WHITE);
+            Style rowStyle = isSelected ? Style.EMPTY.bg(Color.hex("#282b30")).fg(Color.BLACK).bold() : Style.EMPTY.fg(Color.WHITE);
 
             Rect rowRect = new Rect(listRect.x(), listRect.y() + i, listRect.width(), 1);
 

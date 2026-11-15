@@ -112,8 +112,11 @@ public class UiState {
                     incrementAutocompleteIndex();
                 }
                 case TAB, ENTER -> {
-                    inputState.setText(suggestions.get(selectedSuggestionIndex));
-                    currentSuffix = "";
+                    if (!suggestions.isEmpty() && selectedSuggestionIndex < suggestions.size()) {
+                        inputState.setText(suggestions.get(selectedSuggestionIndex));
+                        currentSuffix = "";
+                        closeAutocomplete();
+                    }
                 }
                 case ESCAPE -> {
                     closeAutocomplete();
@@ -227,6 +230,12 @@ public class UiState {
     public void openAutocomplete() {
         isAutocompleteOpen = true;
         selectedSuggestionIndex = 0;
+
+        suggestions.clear();
+
+        for (int i = history.size() - 1; i >= 0; i--) {
+            suggestions.add(history.get(i).query());
+        }
     }
     public void closeAutocomplete() {
         isAutocompleteOpen = false;

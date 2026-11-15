@@ -10,9 +10,8 @@ import java.io.IOException;
 
 public class Main {
     TuiApp app;
-    Database db;
     public void main(String[] args) throws IOException {
-        this.app = new TuiApp(new Database(), new FileStorageService(), new RequestHandler(db));
+        this.app = new TuiApp(new FileStorageService());
         app.run();
     }
 }
