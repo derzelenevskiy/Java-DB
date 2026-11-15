@@ -57,7 +57,28 @@ public class TuiApp {
                                 } else {
                                     switch (sql) {
                                         case "\\dt" -> {
-                                            uiState.getPaletteCommandList().get(0);
+                                            uiState.getPaletteCommandList().getFirst().action().run();
+                                        }
+                                        case "\\di" -> {
+                                            uiState.getPaletteCommandList().get(1).action().run();
+                                        }
+                                        case "\\save" -> {
+                                            uiState.getPaletteCommandList().get(2).action().run();
+                                        }
+                                        case "\\demo" -> {
+                                            uiState.getPaletteCommandList().get(3).action().run();
+                                        }
+                                        case "\\democlear" -> {
+                                            uiState.getPaletteCommandList().get(4).action().run();
+                                        }
+                                        case "\\bench" -> {
+                                            uiState.getPaletteCommandList().get(5).action().run();
+                                        }
+                                        case "\\help" -> {
+                                            uiState.getPaletteCommandList().get(6).action().run();
+                                        }
+                                        default -> {
+                                            uiState.addCmd(sql, new QueryResult(false, "Unknown command" ,null, null, 0));
                                         }
                                     }
                                 }

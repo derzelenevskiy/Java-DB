@@ -146,6 +146,14 @@ public class UiState {
                     }
                     else if (event.modifiers().ctrl() && (event.isChar('D') || event.isChar('d'))) {
                         openDirectory();
+                    } else if (event.modifiers().ctrl() && (event.isChar('L') || event.isChar('l'))) {
+                        clear();
+                    } else if (event.modifiers().ctrl() && (event.isChar('Q') || event.isChar('q'))) {
+                        try {
+                            //
+                        } catch (Exception ignored) {}
+                        exit();
+
                     } else {
                         inputState.insert(event.string());
                         this.currentSuffix = suggestionEngine.getSuggestionSuffix(inputState.text(), history);
