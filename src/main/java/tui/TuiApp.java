@@ -77,6 +77,8 @@ public class TuiApp {
                                 }
                             } else if (keyEvent.isChar('S') || keyEvent.isChar('s')) {
                                 storageService.save(db);
+                            } else {
+                                uiState.onKeyEvent(keyEvent);
                             }
                         } else {
                             uiState.onKeyEvent(keyEvent);
