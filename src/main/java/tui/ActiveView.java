@@ -22,7 +22,8 @@ import static java.lang.Math.min;
 
 public class ActiveView {
     private final SqlHighlighter highlighter;
-    private final static Paragraph footer = Paragraph.builder().text(MarkupParser.parse("[#EEEEEE]PgUp/PgDn[/] [#3C3C3C]scroll[/]  [#EEEEEE]alt+←/→[/] [#3C3C3C]h-scroll[/]  [#EEEEEE]ctrl+d[/] [#3C3C3C]directory[/]  [#EEEEEE]ctrl+p[/] [#3C3C3C]commands[/]")).alignment(Alignment.RIGHT).build();
+    private final static Paragraph footer = Paragraph.builder().text(MarkupParser.parse("[#EEEEEE]PgUp/PgDn[/] [#3C3C3C]scroll[/]  [#EEEEEE]alt+←/→[/] [#3C3C3C]h-scroll[/]  [#EEEEEE]ctrl+d[/] [#3C3C3C]directory[/]  [#EEEEEE]ctrl+h[/] [#3C3C3C]history[/]  [#EEEEEE]ctrl+p[/] [#3C3C3C]commands[/]")).alignment(Alignment.RIGHT).build();
+
     private final static Paragraph session = Paragraph.from("Database");
 
     public ActiveView(SqlHighlighter highlighter) {

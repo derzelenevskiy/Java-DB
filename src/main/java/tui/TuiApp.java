@@ -21,8 +21,8 @@ public class TuiApp {
     private final UiState uiState;
     private final MainView mainView;
     private final DemoDataInitializer demoDataInitializer = new DemoDataInitializer();
-    public TuiApp(FileStorageService storageService) {
-        this.db = new Database();
+    public TuiApp(FileStorageService storageService) throws IOException {
+        this.db = storageService.load();
         this.storageService = storageService;
         List<UiState.DirectoryCommand> directoryCommandList = new ArrayList<>();
         List<UiState.PaletteCommand> paletteCommandList = new ArrayList<>();
