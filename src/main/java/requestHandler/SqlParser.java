@@ -204,6 +204,23 @@ public class SqlParser {
 
                 command.addColumn(columnName, columnType);
 
+                while (!tokens.get(position).equals(",") && !tokens.get(position).equals(")")) {
+                    if (tokens.get(position).equalsIgnoreCase("PRIMARY")
+                            && tokens.get(position + 1).equalsIgnoreCase("KEY")) {
+                        command.setPrimaryKey(columnName);
+                        position = position + 2;
+                    } else if (tokens.get(position).equalsIgnoreCase("REFERENCES")
+                            && tokens.get(position + 2).equals("(")
+                            && tokens.get(position + 4).equals(")")) {
+                        String refTable = tokens.get(position + 1);
+                        String refColumn = tokens.get(position + 3);
+                        command.addForeignKey(columnName, refTable, refColumn);
+                        position = position + 5;
+                    } else {
+                        throw new IllegalArgumentException("Неизвестный параметр столбца: " + tokens.get(position));
+                    }
+                }
+
                 if (tokens.get(position).equals(",")) {
                     position++;
                 }
