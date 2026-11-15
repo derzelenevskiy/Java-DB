@@ -7,6 +7,7 @@ import dev.tamboui.tui.TuiRunner;
 import dev.tamboui.tui.event.KeyCode;
 import dev.tamboui.tui.event.TickEvent;
 import model.QueryResult;
+import requestHandler.RequestHandler;
 import requestHandler.SqlParser;
 import storage.FileStorageService;
 
@@ -18,11 +19,11 @@ import java.util.List;
 public class TuiApp {
     private Database db;
     private final FileStorageService storageService;
-    private final SqlParser requestHandler;
+    private final RequestHandler requestHandler;
     private final UiState uiState;
     private final MainView mainView;
 
-    public TuiApp(Database db, FileStorageService storageService, SqlParser requestHandler) {
+    public TuiApp(Database db, FileStorageService storageService, RequestHandler requestHandler) {
         this.db = db;
         this.storageService = storageService;
         this.requestHandler = requestHandler;
@@ -83,11 +84,11 @@ public class TuiApp {
     private List<UiState.PaletteCommand> createPaletteCommandList() {
         return List.of(
                 new UiState.PaletteCommand("Show tables", "\\dt", () -> {
-                    QueryResult res = requestHandler.parse("SELECT * FROM information_schema.tables");
+                    QueryResult res = requestHandler.parse("SELECT * FROM db.getTableNames()");
                     uiState.addCmd("\\dt", res);
                 }),
                 new UiState.PaletteCommand("Show indexes", "\\di", () -> {
-                    QueryResult res = requestHandler.parse("SELECT * FROM system_indexes;");
+                    QueryResult res = requestHandler.parse("SELECT * FROM db.getTableIndexes()");
                     uiState.addCmd("\\di", res);
                 }),
                 new UiState.PaletteCommand("Working directory", "ctrl+d", () -> {
@@ -103,6 +104,8 @@ public class TuiApp {
                 }),
                 new UiState.PaletteCommand("Load demo sample data", "\\demo", () -> {
                     try {
+                        requestHandler.parse(List.of("DROP TABLE IF EXISTS rooms"));
+                        requestHandler.parse(List.of("DROP TABLE IF EXISTS guests"));
                         requestHandler.parse(List.of("CREATE TABLE rooms (id INT, number INT, type STRING, price FLOAT, is_occupied BOOLEAN);"));
                         requestHandler.parse(List.of("CREATE TABLE guests (id INT, full_name STRING, room_id INT, check_in STRING, check_out STRING, is_paid BOOLEAN);"));
 

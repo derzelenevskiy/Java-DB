@@ -1,6 +1,7 @@
 package org.example;
 
 import db.Database;
+import requestHandler.RequestHandler;
 import requestHandler.SqlParser;
 import storage.FileStorageService;
 import tui.TuiApp;
@@ -11,7 +12,7 @@ public class Main {
     TuiApp app;
 
     public void main(String[] args) throws IOException {
-        this.app = new TuiApp(new Database(), new FileStorageService(), new SqlParser());
+        this.app = new TuiApp(new Database(), new FileStorageService(), new RequestHandler(db));
         app.run();
     }
 }
