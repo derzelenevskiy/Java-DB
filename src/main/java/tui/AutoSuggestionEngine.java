@@ -7,14 +7,14 @@ import java.util.regex.Pattern;
 public class AutoSuggestionEngine {
     private static final Pattern NEXT_WORD = Pattern.compile("^(\\s*\\S+)");
 
-    public String getSuggestionSuffix(String currentInput, List<UiState.HistoryEntry> history) {
-        if (currentInput == null || currentInput.isEmpty() || history == null || history.isEmpty()) {
+    public String getSuggestionSuffix(String currentInput, List<UiState.HistoryEntry> successfulHistory) {
+        if (currentInput == null || currentInput.isEmpty() || successfulHistory == null || successfulHistory.isEmpty()) {
             return "";
         }
         String inputLower = currentInput.toLowerCase();
 
-        for (int i = history.size() - 1; i >= 0; --i) {
-            UiState.HistoryEntry entry = history.get(i);
+        for (int i = successfulHistory.size() - 1; i >= 0; --i) {
+            UiState.HistoryEntry entry = successfulHistory.get(i);
             if (entry == null || entry.query() == null) {
                 continue;
             }

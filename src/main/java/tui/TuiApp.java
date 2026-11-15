@@ -45,32 +45,38 @@ public class TuiApp {
                 }
                 switch (event) {
                     case KeyEvent keyEvent -> {
-                        if (keyEvent.code() == KeyCode.ENTER && keyEvent.modifiers().ctrl()) {
-                            String sql = uiState.getInputState().text();
+                        if (keyEvent.modifiers().ctrl()) {
+                            if (keyEvent.isChar('Q') || keyEvent.isChar('q')) {
+                                uiState.getPaletteCommandList().getLast().action().run();
+                            } else if (keyEvent.code() == KeyCode.ENTER) {
+                                String sql = uiState.getInputState().text().trim();
 
-                            if (!sql.isBlank()) {
-                                if (!sql.startsWith("\\")) {
-                                    try {
-                                        QueryResult result = requestHandler.parse(sql);
-                                        uiState.addCmd(sql, result);
-                                        storageService.save(db);
-                                    } catch (Exception e) {
-                                        QueryResult result = new QueryResult(false, e.getMessage(), null, null, 0);
-                                        uiState.addCmd(sql, result);
-                                    }
-                                } else {
-                                    boolean found = false;
-                                    for (UiState.PaletteCommand cmd : uiState.getPaletteCommandList()) {
-                                        if (cmd.shortcut().equals(sql)) {
-                                            cmd.action().run();
-                                            found = true;
-                                            break;
+                                if (!sql.isBlank()) {
+                                    if (!sql.startsWith("\\")) {
+                                        try {
+                                            QueryResult result = requestHandler.parse(sql);
+                                            uiState.addCmd(sql, result);
+                                            storageService.save(db);
+                                        } catch (Exception e) {
+                                            QueryResult result = new QueryResult(false, e.getMessage(), null, null, 0);
+                                            uiState.addCmd(sql, result);
+                                        }
+                                    } else {
+                                        boolean found = false;
+                                        for (UiState.PaletteCommand cmd : uiState.getPaletteCommandList()) {
+                                            if (cmd.shortcut().equals(sql)) {
+                                                cmd.action().run();
+                                                found = true;
+                                                break;
+                                            }
+                                        }
+                                        if (!found) {
+                                            uiState.addCmd(sql, new QueryResult(false, "Unknown command", null, null, 0));
                                         }
                                     }
-                                    if (!found) {
-                                        uiState.addCmd(sql, new QueryResult(false, "Unknown command", null, null, 0));
-                                    }
                                 }
+                            } else if (keyEvent.isChar('S') || keyEvent.isChar('s')) {
+                                storageService.save(db);
                             }
                         } else {
                             uiState.onKeyEvent(keyEvent);
@@ -138,9 +144,7 @@ public class TuiApp {
                     uiState.addCmd("\\democlear", res);
                     uiState.getInputState().clear();
                 }),
-                new UiState.PaletteCommand("Run benchmark: Room Type Search", "\\bench", () -> {
-                    uiState.clear();
-                }),
+                new UiState.PaletteCommand("Run benchmark: Room Type Search", "\\bench", uiState::clear),
                 new UiState.PaletteCommand("SQL syntax reference", "\\help", () -> {
                     String helpText = """
                         SQL CHEAT SHEET:

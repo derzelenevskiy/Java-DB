@@ -8,6 +8,7 @@ import model.QueryResult;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class UiState {
     public UiState(List<PaletteCommand> paletteCommandList, List<DirectoryCommand> directoryCommandList) {
         this.directoryCommandList = directoryCommandList;
@@ -25,9 +26,6 @@ public class UiState {
     public List<HistoryEntry> getHistory() {
         return history;
     }
-    public List<HistoryEntry> getSuccessfulHistory() {
-        return getSuccessfulHistory();
-    }
 
     public List<PaletteCommand> getPaletteCommandList() {
         return paletteCommandList;
@@ -37,11 +35,43 @@ public class UiState {
         return isActiveMode;
     }
 
+    private int feedScrollOffset = 0;
+    private int feedHScrollOffset = 0;
+    private boolean autoScrollToBottom = true;
+
+    public int getFeedScrollOffset() { return feedScrollOffset; }
+    public int getFeedHScrollOffset() { return feedHScrollOffset; }
+    public boolean isAutoScrollToBottom() { return autoScrollToBottom; }
+
+    public void scrollFeedUp(int lines) {
+        this.feedScrollOffset = Math.max(0, this.feedScrollOffset - lines);
+        this.autoScrollToBottom = false;
+    }
+
+    public void scrollFeedDown(int lines) {
+        this.feedScrollOffset += lines;
+        this.autoScrollToBottom = true;
+    }
+
+    public void scrollFeedLeft(int chars) {
+        this.feedHScrollOffset = Math.max(0, this.feedHScrollOffset - chars);
+    }
+
+    public void scrollFeedRight(int chars) {
+        this.feedHScrollOffset += chars;
+    }
+
+    public void setFeedScrollOffset(int offset) {
+        this.feedScrollOffset = offset;
+    }
+
+
+
     public record HistoryEntry(String query, QueryResult queryResult) {}
     public record PaletteCommand(String title, String shortcut, Runnable action) {}
     public record DirectoryCommand(String title, Runnable action) {}
 
-    private List<HistoryEntry> successfulHistory;
+    private final List<HistoryEntry> successfulHistory;
     private final TextAreaState inputState;
     private boolean isActiveMode = false;
     private boolean isRunning = true;
@@ -128,6 +158,7 @@ public class UiState {
             }
         } else if (isDirectoryOpen) {
             switch (event.code()) {
+
                 case UP -> {
                     decrementDirectoryIndex();
                 }
@@ -155,41 +186,58 @@ public class UiState {
                         openDirectory();
                     } else if (event.modifiers().ctrl() && (event.isChar('L') || event.isChar('l'))) {
                         clear();
-                    } else if (event.modifiers().ctrl() && (event.isChar('Q') || event.isChar('q'))) {
-                        try {
-                            //
-                        } catch (Exception ignored) {}
-                        exit();
-
                     } else {
                         inputState.insert(event.string());
-                        this.currentSuffix = suggestionEngine.getSuggestionSuffix(inputState.text(), history);
+                        this.currentSuffix = suggestionEngine.getSuggestionSuffix(inputState.text(), successfulHistory);
+                    }
+                }
+                case PAGE_UP -> scrollFeedUp(5);
+                case PAGE_DOWN -> scrollFeedDown(5);
+                case UP -> {
+                    if (event.modifiers().ctrl()) {
+                        scrollFeedUp(2);
+                    } else {
+                        inputState.moveCursorUp();
+                    }
+                }
+                case DOWN -> {
+                    if (event.modifiers().ctrl()) {
+                        scrollFeedDown(2);
+                    } else {
+                        inputState.moveCursorDown();
                     }
                 }
                 case BACKSPACE -> {
                     inputState.deleteBackward();
-                    this.currentSuffix = suggestionEngine.getSuggestionSuffix(inputState.text(), history);
+                    this.currentSuffix = suggestionEngine.getSuggestionSuffix(inputState.text(), successfulHistory);
                 }
                 case DELETE -> {
                     inputState.deleteForward();
-                    this.currentSuffix = suggestionEngine.getSuggestionSuffix(inputState.text(), history);
+                    this.currentSuffix = suggestionEngine.getSuggestionSuffix(inputState.text(), successfulHistory);
                 }
                 case LEFT -> {
-                    inputState.moveCursorLeft();
+                    if (event.modifiers().alt()) {
+                        scrollFeedLeft(10);
+                    } else {
+                        inputState.moveCursorLeft();
+                    }
                 }
                 case RIGHT -> {
-                    if (!currentSuffix.isEmpty() && isCursorAtEnd(inputState))
-                    {
-                        if (event.modifiers().ctrl()) {
-                            String word = suggestionEngine.getNextWord(currentSuffix);
-                            inputState.insert(word);
-                            currentSuffix = currentSuffix.substring(word.length());
-                        } else {
-                            inputState.insert(currentSuffix);
-                            currentSuffix = "";
-                        }
+                    if (event.modifiers().alt()) {
+                        scrollFeedRight(10);
                     } else {
-                        inputState.moveCursorRight();
+                        if (!currentSuffix.isEmpty() && isCursorAtEnd(inputState)) {
+                            if (event.modifiers().ctrl()) {
+                                String word = suggestionEngine.getNextWord(currentSuffix);
+                                inputState.insert(word);
+                                currentSuffix = currentSuffix.substring(word.length());
+                            } else {
+                                inputState.insert(currentSuffix);
+                                currentSuffix = "";
+                            }
+                        } else {
+                            inputState.moveCursorRight();
+                        }
                     }
                 }
                 case ENTER -> {
@@ -253,6 +301,12 @@ public class UiState {
         isActiveMode = true;
         currentSuffix = "";
         inputState.clear();
+        resetFeedScroll();
+    }
+    public void resetFeedScroll() {
+        this.feedScrollOffset = 0;
+        this.feedHScrollOffset = 0;
+        this.autoScrollToBottom = true;
     }
     public void clear() {
         history.clear();
