@@ -58,7 +58,7 @@ public class TuiApp {
                                 uiState.addCmd(sql, result);
                                 storageService.save(db);
                             } catch (Exception e) {
-                                QueryResult result = new QueryResult(false,  ,null, null, 0);
+                                QueryResult result = new QueryResult(false, e.getMessage(),null, null, 0);
                                 uiState.addCmd(sql, result);
                             }
                         }
