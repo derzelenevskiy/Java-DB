@@ -56,7 +56,7 @@ public class Table implements Serializable {
         if (values.length != fields.size()) throw new SizeMismatchException();
         for (int i = 0; i < entry.length; ++i) {
             if (fields.contains(i)) {
-                if (!this.entryTemplate[i].equals(values[fields.indexOf(i)].getClass())) throw new TypeMismatchException();
+                if (!this.entryTemplate[i].equals(values[fields.indexOf(i)].getClass()) && !(!(i == this.primary) && values[fields.indexOf(i)].equals(this.nullObject))) throw new TypeMismatchException();
                 if (this.references.containsKey(i) && !this.references.get(i).getKeys().contains(values[fields.indexOf(i)]))  throw new InvalidReferenceException();
                 entry[i] = values[fields.indexOf(i)];
             }
@@ -119,7 +119,7 @@ public class Table implements Serializable {
                 }
                 rows[0][fieldIndexes.get(i)] = values[i];
             }
-            this.table.remove(rows[0][this.primary]);
+            this.table.remove(oldPrimary);
             this.table.put(values[primaryIndex], rows[0]);
             return 1;
         }
@@ -183,9 +183,7 @@ public class Table implements Serializable {
         var rows = new ArrayList<Object[]>();
         var fieldIndex = this.columnIndexes.get(field);
         if (fieldIndex == null) throw new InvalidFieldException();
-        if (!this.entryTemplate[fieldIndex].equals(value.getClass())) {
-            throw new TypeMismatchException();
-        }
+        if (!this.entryTemplate[fieldIndex].equals(value.getClass()) && !((comp == Comparator.EQUAL || comp == Comparator.NEQUAL) && value.equals(this.nullObject))) throw new TypeMismatchException();
         if (fieldIndex == this.primary && comp == Comparator.EQUAL) {
             var selectedRow = this.table.get(value);
             if (selectedRow != null) {
