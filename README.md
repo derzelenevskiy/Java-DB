@@ -20,3 +20,7 @@ Supported types: `INT` / `INTEGER`, `DOUBLE` / `FLOAT`, `STRING`, `DATE` (`'YYYY
 Supported operators: `=`, `!=`, `<`, `>`, `<=`, `>=`
 
 `STRING` and `DATE` values must be enclosed in single quotes (`'...'`). Every query must end with `;`.
+
+## Building and running from source
+
+Build the package with maven then run ```Java-DB-1.0-SNAPSHOT.jar``` in ```./target```
