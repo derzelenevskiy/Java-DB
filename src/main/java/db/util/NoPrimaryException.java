@@ -1,3 +1,3 @@
 package db.util;
 
-public class NoPrimaryException extends Exception {}
+public class NoPrimaryException extends RuntimeException {}

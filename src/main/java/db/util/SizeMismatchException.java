@@ -1,3 +1,3 @@
 package db.util;
 
-public class SizeMismatchException extends Exception {}
+public class SizeMismatchException extends RuntimeException {}

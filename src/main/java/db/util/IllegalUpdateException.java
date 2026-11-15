@@ -1,3 +1,3 @@
 package db.util;
 
-public class IllegalUpdateException extends Exception {}
+public class IllegalUpdateException extends RuntimeException {}

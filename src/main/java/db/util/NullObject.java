@@ -1,3 +1,5 @@
 package db.util;
 
-public class NullObject {}
+import java.io.Serializable;
+
+public class NullObject implements Serializable {}

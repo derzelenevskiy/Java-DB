@@ -1,3 +1,3 @@
 package db.util;
 
-public class TypeMismatchException extends Exception {}
+public class TypeMismatchException extends RuntimeException {}
