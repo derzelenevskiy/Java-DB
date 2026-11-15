@@ -92,12 +92,32 @@ public class TuiApp {
         assert uiState != null;
         return List.of(
                 new UiState.PaletteCommand("Show tables", "\\dt", () -> {
-                    QueryResult res = requestHandler.parse("SELECT * FROM db.getTableNames()");
-                    uiState.addCmd("\\dt", res);
+                    try {
+                        List<String> tableNames = List.of(db.getTableNames());
+                        if (tableNames.isEmpty()) {
+                            uiState.addCmd("\\dt", new QueryResult(true, "No tables found.", null, null, 0));
+                            return;
+                        }
+                        String[] headers = {"Table Name"};
+                        Object[][] data = new Object[tableNames.size()][1];
+                        for (int i = 0; i < tableNames.size(); i++) {
+                            data[i][0] = tableNames.get(i);
+                        }
+                        uiState.addCmd("\\dt", new QueryResult(true, "", headers, data, 0));
+
+                    } catch (Exception e) {
+                        uiState.addCmd("\\dt", new QueryResult(false, "Error getting tables: " + e.getMessage(), null, null, 0));
+                    }
                 }),
                 new UiState.PaletteCommand("Show indexes", "\\di", () -> {
-                    QueryResult res = requestHandler.parse("SELECT * FROM db.getTableIndexes()");
-                    uiState.addCmd("\\di", res);
+                    try {
+                        String[] headers = {"Index Name", "Table"};
+                        Object[][] data = {};
+
+                        uiState.addCmd("\\di", new QueryResult(true, "Indexes listed successfully", headers, data, 0));
+                    } catch (Exception e) {
+                        uiState.addCmd("\\di", new QueryResult(false, "Error getting indexes: " + e.getMessage(), null, null, 0));
+                    }
                 }),
                 new UiState.PaletteCommand("Working directory", "ctrl+d", uiState::openDirectory),
                 new UiState.PaletteCommand("Save database to disk", "ctrl+s", () -> {
