@@ -1,38 +1,12 @@
 package requestHandler;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public class CreateTableCommand extends Command {
-    public static class ForeignKey {
-        private final String column;
-        private final String refTable;
-        private final String refColumn;
-
-        public ForeignKey(String column, String refTable, String refColumn) {
-            this.column = column;
-            this.refTable = refTable;
-            this.refColumn = refColumn;
-        }
-
-        public String getColumn() {
-            return column;
-        }
-
-        public String getRefTable() {
-            return refTable;
-        }
-
-        public String getRefColumn() {
-            return refColumn;
-        }
-    }
-
     private final Map<String, String> columns = new LinkedHashMap<>();
     private String primaryKey;
-    private final List<ForeignKey> foreignKeys = new ArrayList<>();
+    private final Map<String, String> references = new LinkedHashMap<>();
 
     public CreateTableCommand() {
         super(Type.CREATE_TABLE);
@@ -54,11 +28,11 @@ public class CreateTableCommand extends Command {
         this.primaryKey = primaryKey;
     }
 
-    public List<ForeignKey> getForeignKeys() {
-        return foreignKeys;
+    public Map<String, String> getReferences() {
+        return references;
     }
 
-    public void addForeignKey(String column, String refTable, String refColumn) {
-        foreignKeys.add(new ForeignKey(column, refTable, refColumn));
+    public void addReference(String column, String refTable) {
+        references.put(column, refTable);
     }
 }

@@ -24,11 +24,7 @@ public class SqlParser {
         }
 
         else if (FirstToken.equalsIgnoreCase("CREATE")) {
-            if (tokens.get(1).equalsIgnoreCase("TABLE")) {
                 return parseCreate(tokens);
-            } else if (tokens.get(1).equalsIgnoreCase("INDEX")) {
-                return parseCreateIndex(tokens);
-            }
         }
 
         else if (FirstToken.equalsIgnoreCase("DROP")) {
@@ -209,13 +205,10 @@ public class SqlParser {
                             && tokens.get(position + 1).equalsIgnoreCase("KEY")) {
                         command.setPrimaryKey(columnName);
                         position = position + 2;
-                    } else if (tokens.get(position).equalsIgnoreCase("REFERENCES")
-                            && tokens.get(position + 2).equals("(")
-                            && tokens.get(position + 4).equals(")")) {
+                    } else if (tokens.get(position).equalsIgnoreCase("REFERENCES")) {
                         String refTable = tokens.get(position + 1);
-                        String refColumn = tokens.get(position + 3);
-                        command.addForeignKey(columnName, refTable, refColumn);
-                        position = position + 5;
+                        command.addReference(columnName, refTable);
+                        position = position + 2;
                     } else {
                         throw new IllegalArgumentException("Неизвестный параметр столбца: " + tokens.get(position));
                     }
@@ -224,25 +217,6 @@ public class SqlParser {
                 if (tokens.get(position).equals(",")) {
                     position++;
                 }
-            }
-        }
-
-        return command;
-    }
-
-    private Command parseCreateIndex(List<String> tokens) {
-        int position = 2;
-        CreateIndexCommand command = new CreateIndexCommand();
-
-        command.setIndexName(tokens.get(position));
-        position++;
-
-        if (tokens.get(position).equalsIgnoreCase("ON")) {
-            command.setTableName(tokens.get(position + 1));
-            position = position + 2;
-
-            if (tokens.get(position).equals("(")) {
-                command.setColumnName(tokens.get(position + 1));
             }
         }
 

@@ -21,8 +21,6 @@ public class QueryExecutor {
                 return executeCreateTable((CreateTableCommand) command);
             case DROP_TABLE:
                 return executeDropTable((DropTableCommand) command);
-            case CREATE_INDEX:
-                return executeCreateIndex((CreateIndexCommand) command);
             case INSERT:
                 return executeInsert((InsertCommand) command);
             case SELECT:
@@ -40,6 +38,9 @@ public class QueryExecutor {
         Map<String, String> columns = cmd.getColumns();
         if (columns.isEmpty()) {
             throw new IllegalArgumentException("В таблице должен быть хотя бы один столбец");
+        }
+        if (cmd.getPrimaryKey() == null) {
+            throw new IllegalArgumentException("В таблице должен быть PRIMARY KEY");
         }
 
         String[] fieldNames = new String[columns.size()];
@@ -59,18 +60,18 @@ public class QueryExecutor {
             i++;
         }
 
-        db.createTable(cmd.getTableName(), fieldNames, types, primary);
+        if (cmd.getReferences().isEmpty()) {
+            db.createTable(cmd.getTableName(), fieldNames, types, primary);
+        } else {
+            db.createTable(cmd.getTableName(), fieldNames, types, primary, cmd.getReferences());
+        }
+
         return Message("Таблица " + cmd.getTableName() + " создана");
     }
 
     private QueryResult executeDropTable(DropTableCommand cmd) {
         db.dropTable(cmd.getTableName());
         return Message("Таблица " + cmd.getTableName() + " удалена");
-    }
-
-    private QueryResult executeCreateIndex(CreateIndexCommand cmd) {
-        db.createIndex(cmd.getTableName(), cmd.getIndexName(), cmd.getColumnName());
-        return Message("Индекс " + cmd.getIndexName() + " создан");
     }
 
     private Object convertValue(String rawValue, Class<?> colType) {
