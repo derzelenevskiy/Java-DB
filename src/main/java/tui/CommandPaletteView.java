@@ -24,7 +24,7 @@ public class CommandPaletteView {
         List<UiState.PaletteCommand> commands = uiState.getPaletteCommandList();
         Layout verticalLayout = Layout.vertical().constraints(
                 Constraint.fill(),
-                Constraint.length(13),
+                Constraint.length(14),
                 Constraint.fill()
         );
         Layout horizontalLayout = Layout.horizontal().constraints(
