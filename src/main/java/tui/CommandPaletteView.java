@@ -21,36 +21,58 @@ public class CommandPaletteView {
 
     public void render(Rect rect, Frame frame, UiState uiState) {
         Buffer buffer = frame.buffer();
+        List<UiState.PaletteCommand> commands = uiState.getPaletteCommandList();
         Layout verticalLayout = Layout.vertical().constraints(
                 Constraint.fill(),
-                Constraint.length(10),
+                Constraint.length(13),
                 Constraint.fill()
         );
         Layout horizontalLayout = Layout.horizontal().constraints(
                 Constraint.fill(),
-                Constraint.length(50),
+                Constraint.length(60),
                 Constraint.fill()
         );
         Rect modalRect = horizontalLayout.split(verticalLayout.split(rect).get(1)).get(1);
         Clear.INSTANCE.render(modalRect, buffer);
-        Block block = Block.builder().title(Title.from(" Commands ").alignment(Alignment.LEFT)).title(Title.from("esc").alignment(Alignment.RIGHT)).borders(Borders.ALL).borderType(BorderType.ROUNDED).style(Style.EMPTY.fg(Color.GRAY)).build();
+        Block block = Block.builder().title(Title.from(" Commands ").alignment(Alignment.LEFT)).title(Title.from("esc ").alignment(Alignment.RIGHT)).borders(Borders.ALL).borderType(BorderType.ROUNDED).style(Style.EMPTY.fg(Color.GRAY)).build();
         block.render(modalRect, buffer);
         Rect innerRect = block.inner(modalRect);
-        List<Line> lines = new ArrayList<>();
-        int index = 0;
-        for (UiState.PaletteCommand i : uiState.getPaletteCommandList()) {
-            boolean isSelected = (index == uiState.getSelectedPaletteIndex());
-            String text = i.title() + "   " + i.shortcut();
-            if (isSelected) {
-                Line line = Line.styled(text, Style.EMPTY.bg(Color.GREEN).fg(Color.LIGHT_YELLOW).bold());
-                lines.add(line);
-            } else {
-                Line line = Line.from(text);
-                lines.add(line);
-            }
-            ++index;
+
+        Rect listRect = new Rect(
+                innerRect.x() + 2,
+                innerRect.y() + 1,
+                innerRect.width() - 4,
+                innerRect.height() - 2
+        );
+
+        for (int i = 0; i < commands.size(); i++) {
+            UiState.PaletteCommand cmd = commands.get(i);
+            boolean isSelected = (i == uiState.getSelectedPaletteIndex());
+
+            Style rowStyle = isSelected ? Style.EMPTY.bg(Color.hex("#FAB283")).fg(Color.BLACK).bold() : Style.EMPTY.fg(Color.WHITE);
+
+            Rect rowRect = new Rect(listRect.x(), listRect.y() + i, listRect.width(), 1);
+
+            buffer.setStyle(rowRect, rowStyle);
+
+            Layout rowLayout = Layout.horizontal().constraints(
+                    Constraint.fill(),
+                    Constraint.length(15)
+            );
+            List<Rect> rowFrames = rowLayout.split(rowRect);
+
+            Paragraph.builder()
+                    .text(cmd.title())
+                    .style(rowStyle)
+                    .build()
+                    .render(rowFrames.get(0), buffer);
+
+            Paragraph.builder()
+                    .text(cmd.shortcut())
+                    .style(rowStyle)
+                    .alignment(Alignment.RIGHT)
+                    .build()
+                    .render(rowFrames.get(1), buffer);
         }
-        Paragraph menuParagraph = Paragraph.builder().text(Text.from(lines)).build();
-        menuParagraph.render(innerRect, buffer);
     }
 }

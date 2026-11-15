@@ -13,7 +13,7 @@ public class AutoSuggestionEngine {
         }
         String inputLower = currentInput.toLowerCase();
 
-        for (int i = history.size() - 1; i >= 0; ++i) {
+        for (int i = history.size() - 1; i >= 0; --i) {
             UiState.HistoryEntry entry = history.get(i);
             if (entry == null || entry.query() == null) {
                 continue;

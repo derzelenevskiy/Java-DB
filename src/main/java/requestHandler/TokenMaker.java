@@ -14,7 +14,7 @@ public class TokenMaker {
 
             if (current != ' ' && current != '\n') {
                 if (current == '(' || current == ',' || current == ')' || current == ';' || current == '*') {
-                    if (word.length() > 0) {
+                    if (!word.isEmpty()) {
                         tokens.add(word.toString());
                         word.setLength(0);
                     }
@@ -42,7 +42,7 @@ public class TokenMaker {
                                 current == '<' && command.charAt(i + 1) == '=' ||
                                 current == '!' && command.charAt(i + 1) == '=')) {
 
-                    if (word.length() > 0) {
+                    if (!word.isEmpty()) {
                         tokens.add(word.toString());
                     }
 
@@ -55,7 +55,7 @@ public class TokenMaker {
 
                 } else if (current == '>' || current == '<' || current == '=') {
 
-                    if (word.length() > 0) {
+                    if (!word.isEmpty()) {
                         tokens.add(word.toString());
                     }
 
@@ -67,13 +67,13 @@ public class TokenMaker {
                     word.append(current);
                 }
             } else {
-                if (word.length() > 0) {
+                if (!word.isEmpty()) {
                     tokens.add(word.toString());
                 }
                 word.setLength(0);
             }
         }
-        if (word.length() > 0) {
+        if (!word.isEmpty()) {
             tokens.add(word.toString());
         }
 
