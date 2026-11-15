@@ -44,31 +44,33 @@ public class TuiApp {
                 runner.draw(frame -> mainView.render(frame.area(), frame, uiState));
 
                 var event = runner.pollEvent();
-                if (event == null) {
-                    continue;
-                }
+                switch (event) {
+                    case null -> {
+                        continue;
+                    }
+                    case KeyEvent keyEvent -> {
+                        if (keyEvent.code() == KeyCode.ENTER && keyEvent.modifiers().alt()) {
+                            String sql = uiState.getInputState().text();
 
-                if (event instanceof KeyEvent keyEvent) {
-                    if (keyEvent.code() == KeyCode.ENTER && keyEvent.modifiers().ctrl()) {
-                        String sql = uiState.getInputState().text();
-
-                        if (!sql.isBlank()) {
-                            try {
-                                QueryResult result = requestHandler.parse(List.of(sql));
-                                uiState.addCmd(sql, result);
-                                storageService.save(db);
-                            } catch (Exception e) {
-                                QueryResult result = new QueryResult(false, e.getMessage(),null, null, 0);
-                                uiState.addCmd(sql, result);
+                            if (!sql.isBlank()) {
+                                try {
+                                    QueryResult result = requestHandler.parse(List.of(sql));
+                                    uiState.addCmd(sql, result);
+                                    storageService.save(db);
+                                } catch (Exception e) {
+                                    QueryResult result = new QueryResult(false, e.getMessage(), null, null, 0);
+                                    uiState.addCmd(sql, result);
+                                }
                             }
+                        } else {
+                            uiState.onKeyEvent(keyEvent);
                         }
-                    } else {
-                        uiState.onKeyEvent(keyEvent);
+                    }
+                    case TickEvent tickEvent -> uiState.getLogoWaveState().advance();
+                    default -> {
                     }
                 }
-                else if (event instanceof TickEvent tickEvent) {
-                    uiState.getLogoWaveState().advance();
-                }
+
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
