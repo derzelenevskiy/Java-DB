@@ -5,6 +5,7 @@ import db.util.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class Database implements Serializable {
     private final LinkedHashMap<String, Table> tables;
@@ -17,6 +18,14 @@ public class Database implements Serializable {
 
     public void createTable(String tableName, String[] fieldNames, Class<?>[] types, int primary) {
         this.tables.put(tableName, new Table(fieldNames, types, primary, this.nullObject));
+    }
+
+    public void createTable(String tableName, String[] fieldNames, Class<?>[] types, int primary, Map<String, String> references) {
+        var tableReferences = new LinkedHashMap<String, Table>();
+        for (var ref: references.keySet()) {
+            tableReferences.put(ref, this.tables.get(references.get(ref)));
+        }
+        this.tables.put(tableName, new Table(fieldNames, types, primary, tableReferences, this.nullObject));
     }
 
     public void dropTable(String tableName) {
@@ -62,6 +71,8 @@ public class Database implements Serializable {
     public Object[][] select(String tableName, String[] fields) {
         return this.tables.get(tableName).select(fields);
     }
+
+    public void createIndex(String tableName, String indexName, String field) {}
 
     public NullObject getNull() {
         return this.nullObject;
