@@ -24,11 +24,12 @@ public class TuiApp {
     public TuiApp(Database db, FileStorageService storageService, RequestHandler requestHandler) {
         this.db = db;
         this.storageService = storageService;
-        this.requestHandler = requestHandler;
-        List<UiState.PaletteCommand> paletteCommandList = new ArrayList<>(createPaletteCommandList());
         List<UiState.DirectoryCommand> directoryCommandList = new ArrayList<>();
-        this.mainView = new MainView();
+        List<UiState.PaletteCommand> paletteCommandList = new ArrayList<>();
         this.uiState = new UiState(paletteCommandList, directoryCommandList);
+        this.requestHandler = requestHandler;
+        paletteCommandList.addAll(createPaletteCommandList());
+        this.mainView = new MainView();
     }
     public void run() throws IOException {
         TuiConfig config = TuiConfig.builder()
@@ -39,9 +40,12 @@ public class TuiApp {
                 runner.draw(frame -> mainView.render(frame.area(), frame, uiState));
 
                 var event = runner.pollEvent();
+                if (event == null) {
+                    continue;
+                }
                 switch (event) {
                     case KeyEvent keyEvent -> {
-                        if (keyEvent.code() == KeyCode.ENTER && keyEvent.modifiers().alt()) {
+                        if (keyEvent.code() == KeyCode.ENTER && keyEvent.modifiers().ctrl()) {
                             String sql = uiState.getInputState().text();
 
                             if (!sql.isBlank()) {
@@ -63,19 +67,19 @@ public class TuiApp {
                                             uiState.getPaletteCommandList().get(1).action().run();
                                         }
                                         case "\\save" -> {
-                                            uiState.getPaletteCommandList().get(2).action().run();
-                                        }
-                                        case "\\demo" -> {
                                             uiState.getPaletteCommandList().get(3).action().run();
                                         }
-                                        case "\\democlear" -> {
+                                        case "\\demo" -> {
                                             uiState.getPaletteCommandList().get(4).action().run();
                                         }
-                                        case "\\bench" -> {
+                                        case "\\democlear" -> {
                                             uiState.getPaletteCommandList().get(5).action().run();
                                         }
-                                        case "\\help" -> {
+                                        case "\\bench" -> {
                                             uiState.getPaletteCommandList().get(6).action().run();
+                                        }
+                                        case "\\help" -> {
+                                            uiState.getPaletteCommandList().get(7).action().run();
                                         }
                                         default -> {
                                             uiState.addCmd(sql, new QueryResult(false, "Unknown command" ,null, null, 0));
@@ -130,7 +134,7 @@ public class TuiApp {
                     uiState.getInputState().clear();
                 }),
                 new UiState.PaletteCommand("Run benchmark: Room Type Search", "\\bench", () -> {
-                    //
+                    uiState.clear();
                 }),
                 new UiState.PaletteCommand("SQL syntax reference", "\\help", () -> {
                     String helpText = """

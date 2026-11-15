@@ -152,7 +152,7 @@ public class WelcomeView {
         int scrollOffset = Math.max(0, cursorVisualRow - totalLines + 1);
 
         if (text.isEmpty()) {
-            Paragraph hint = Paragraph.builder().text("Enter command... (alt+enter to execute)").foreground(Color.hex("#5D5D5D")).build();
+            Paragraph hint = Paragraph.builder().text("Enter command... (ctrl+enter to execute)").foreground(Color.hex("#5D5D5D")).build();
             hint.render(innerRect, buffer);
         } else {
             List<Line> lines = new ArrayList<>();
