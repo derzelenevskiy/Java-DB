@@ -188,7 +188,7 @@ public class UiState {
                         clear();
                     } else {
                         inputState.insert(event.string());
-                        this.currentSuffix = suggestionEngine.getSuggestionSuffix(inputState.text(), successfulHistory);
+                        this.currentSuffix = suggestionEngine.getSuggestionSuffix(inputState.text(), history);
                     }
                 }
                 case PAGE_UP -> scrollFeedUp(5);
@@ -209,11 +209,11 @@ public class UiState {
                 }
                 case BACKSPACE -> {
                     inputState.deleteBackward();
-                    this.currentSuffix = suggestionEngine.getSuggestionSuffix(inputState.text(), successfulHistory);
+                    this.currentSuffix = suggestionEngine.getSuggestionSuffix(inputState.text(), history);
                 }
                 case DELETE -> {
                     inputState.deleteForward();
-                    this.currentSuffix = suggestionEngine.getSuggestionSuffix(inputState.text(), successfulHistory);
+                    this.currentSuffix = suggestionEngine.getSuggestionSuffix(inputState.text(), history);
                 }
                 case LEFT -> {
                     if (event.modifiers().alt()) {
