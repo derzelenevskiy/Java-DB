@@ -13,7 +13,7 @@ public class DemoDataInitializer {
             safeDropTable(requestHandler, "rooms");
 
             requestHandler.parse("CREATE TABLE rooms (id INT PRIMARY KEY, number INT, type STRING, price FLOAT, is_occupied BOOLEAN);");
-            requestHandler.parse("CREATE TABLE guests (id PRIMARY INT PRIMARY KEY, full_name STRING, room_id INT, check_in DATE, check_out DATE, is_paid BOOLEAN);");
+            requestHandler.parse("CREATE TABLE guests (id INT PRIMARY KEY, full_name STRING, room_id INT, check_in DATE, check_out DATE, is_paid BOOLEAN);");
 
             requestHandler.parse("INSERT INTO rooms VALUES (1, 101, 'Single', 2500.0, TRUE);");
             requestHandler.parse("INSERT INTO rooms VALUES (2, 102, 'Double', 4500.0, TRUE);");
