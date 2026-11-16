@@ -9,7 +9,7 @@
 
 Simple in-memory DBMS made with pure Java. Features SQL-like commands and terminal UI inspired by [OpenCode](https://opencode.ai) and launched by the [TamboUI](https://tamboui.dev) framework.
 
-## Valid requests:
+### Valid requests:
 
 - ```CREATE TABLE <table_name> (<column> <type> [PRIMARY KEY] [REFERENCES <ref_table>], ...);```
 - ```DROP TABLE <table_name>;```
@@ -19,6 +19,8 @@ Simple in-memory DBMS made with pure Java. Features SQL-like commands and termin
 - ```SELECT <col1>, <col2>, ... FROM <table_name> [WHERE <column> <operator> <value>];```
 - ```UPDATE <table_name> SET <col1> = <val1>, ... [WHERE <column> <operator> <value>];```
 - ```DELETE FROM <table_name> [WHERE <column> <operator> <value>];```
+
+***
 
 Supported types: `INT` / `INTEGER`, `DOUBLE` / `FLOAT`, `STRING`, `DATE` (`'YYYY-MM-DD'`), `BOOLEAN` / `BOOL`
 
